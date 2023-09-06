@@ -1,5 +1,9 @@
 package Com.dnb.jdbcdemo.utils;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -7,39 +11,19 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Optional;
 import java.util.Properties;
-
+@Component
 public class DBUtils {
 
-    private static Properties properties;
-    private static Properties getProperties(){
+public DBUtils(){
 
-        //Take input from application.properties file which is present in resources folder
-        InputStream inputStream = DBUtils.class.getClassLoader().getResourceAsStream("application.properties");
+}
+@Autowired
+private Environment environment;
 
-
-        try {
-            if(inputStream != null){
-
-                //Create object for properties and store the stream into the properties object.
-                properties = new Properties();
-                properties.load(inputStream);
-
-                return properties;
-            }
-            return null;
-
-        }
-        catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static Optional<Connection> getConnection(){
-
-        Properties properties = getProperties();
+    public Optional<Connection> getConnection(){
 
         try {
-            Connection connection = DriverManager.getConnection(properties.getProperty("jdbc.url"),properties.getProperty("jdbc.username"), properties.getProperty("jdbc.password"));
+            Connection connection = DriverManager.getConnection(environment.getProperty("jdbc.url"),environment.getProperty("jdbc.username"),environment.getProperty("jdbc.password"));
             return Optional.of(connection);
         }
         catch (SQLException e) {
@@ -47,7 +31,7 @@ public class DBUtils {
         }
     }
 
-    public static void closeConnection(Connection connection){
+    public void closeConnection(Connection connection){
 
         try {
             connection.close();
@@ -57,8 +41,5 @@ public class DBUtils {
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println(DBUtils.getProperties());
-    }
 
 }

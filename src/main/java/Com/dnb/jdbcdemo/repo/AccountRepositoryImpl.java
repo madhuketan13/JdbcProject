@@ -2,38 +2,25 @@ package Com.dnb.jdbcdemo.repo;
 
 import Com.dnb.jdbcdemo.dto.Account;
 import Com.dnb.jdbcdemo.utils.DBUtils;
-import com.mysql.cj.protocol.Resultset;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public class AccountRepositoryImpl implements AccountRepository {
-
-    private static AccountRepository accountRepository;
-    private AccountRepositoryImpl(){
-
-    }
-    public static AccountRepository getInstance(){
-
-        synchronized (AccountRepositoryImpl.class){
-            if(accountRepository == null) {
-                accountRepository = new AccountRepositoryImpl();
-            }
-        }
-
-        return accountRepository;
-    }
-
+    @Autowired
+    private DBUtils dbUtils;
     @Override
     public Account createAccount(Account account) {
 
-        Optional<Connection> connection = DBUtils.getConnection();
+        Optional<Connection> connection = dbUtils.getConnection();
         String createAccount = "insert into account"
                 + "(accountId ,accountHolderName ,accountType ,balance ,contactNumber ,address ,accountCreatedDate ,dob, accountStatus)"
                 + " values(?,?,?,?,?,?,?,?,?)";
@@ -65,7 +52,7 @@ public class AccountRepositoryImpl implements AccountRepository {
             }
             finally {
                 if(connection.isPresent()){
-                    DBUtils.closeConnection(connection.get());
+                    dbUtils.closeConnection(connection.get());
                 }
             }
         }
@@ -76,7 +63,7 @@ public class AccountRepositoryImpl implements AccountRepository {
     @Override
     public Optional<Account> getAccountById(String accountId) {
 
-        Optional<Connection> connection = DBUtils.getConnection();
+        Optional<Connection> connection = dbUtils.getConnection();
         PreparedStatement preparedStatement = null;
         ResultSet resultset = null;
         String query = "select * from account where accountId = ?";
@@ -109,7 +96,7 @@ public class AccountRepositoryImpl implements AccountRepository {
             }
             finally {
                 if(connection.isPresent()){
-                    DBUtils.closeConnection(connection.get());
+                    dbUtils.closeConnection(connection.get());
                 }
             }
         }
@@ -119,7 +106,7 @@ public class AccountRepositoryImpl implements AccountRepository {
     @Override
     public boolean deleteAccountById(String accountId) {
 
-        Optional<Connection> connection = DBUtils.getConnection();
+        Optional<Connection> connection = dbUtils.getConnection();
         PreparedStatement preparedStatement = null;
 
         String delete = "DELETE FROM account WHERE accountId = ? ";
@@ -138,7 +125,7 @@ public class AccountRepositoryImpl implements AccountRepository {
             throw new RuntimeException(e);
         }
         finally {
-            connection.ifPresent(DBUtils::closeConnection);
+            connection.ifPresent(dbUtils::closeConnection);
         }
         return false;
     }
@@ -146,7 +133,7 @@ public class AccountRepositoryImpl implements AccountRepository {
     @Override
     public List<Account> getAllAccounts() {
 
-        Optional<Connection> connection = DBUtils.getConnection();
+        Optional<Connection> connection = dbUtils.getConnection();
         ResultSet resultSet = null;
 
         List<Account> accounts = new ArrayList<>();
@@ -178,7 +165,7 @@ public class AccountRepositoryImpl implements AccountRepository {
                 throw new RuntimeException(e);
             }
             finally {
-                connection.ifPresent(DBUtils::closeConnection);
+                connection.ifPresent(dbUtils::closeConnection);
             }
         }
         return null;
